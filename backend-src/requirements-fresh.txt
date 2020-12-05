@@ -1,0 +1,6 @@
+en-core-web-lg
+nltk
+pip-chill
+scikit-learn
+spacy-lookups-data
+tensorflow
