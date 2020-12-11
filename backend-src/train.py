@@ -1,6 +1,8 @@
 import tensorflow as tf
 
 import logging
+from datetime import date
+from time import sleep
 
 from sklearn.metrics import classification_report
 from spacy.lang.en import English
@@ -27,7 +29,9 @@ def get_word_index(word: str):
 sentiment_model = tf.keras.models.Sequential([
     tf.keras.layers.Embedding(input_dim=embedding_vectors.shape[0], output_dim=embedding_vectors.shape[1],
                               weights=[embedding_vectors], trainable=False),
-    tf.keras.layers.LSTM(units=25, activation=tf.keras.activations.tanh),
+    tf.keras.layers.Dense(units=50, activation=tf.keras.activations.tanh),
+    tf.keras.layers.Dense(units=50, activation=tf.keras.activations.tanh),
+    tf.keras.layers.LSTM(units=30, activation=tf.keras.activations.tanh),
     tf.keras.layers.Dense(units=2, activation=tf.keras.activations.softmax)
 ])
 
@@ -35,7 +39,13 @@ sentiment_model.compile(loss=tf.keras.losses.BinaryCrossentropy(),
                         optimizer=tf.keras.optimizers.Adam(),
                         metrics=[tf.keras.metrics.BinaryAccuracy()])
 
-sentiment_model.fit(x_train, y_train, verbose=2, epochs=75, validation_split=0.15)
+num_phases = 20
+save_base_path = f'K:\\sentiment-model-{date.today().isoformat()}-dense-and-lstm'
+for this_phase in range(num_phases):
+    print(f'Phase {this_phase}:')
+    sentiment_model.fit(x_train, y_train, verbose=2, epochs=10)
+    sentiment_model.save(f'{save_base_path}-p{this_phase}')
+    sleep(30)
 
 y_test_results = sentiment_model.predict(x_test)
 single_y_test = [(1 if y >= 0.5 else 0) for (_, y) in y_test]

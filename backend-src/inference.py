@@ -1,4 +1,4 @@
-from typing import Dict, List, Iterable, Set, Tuple, Union
+from typing import List, Iterable, Set, Tuple, Union
 from nltk.corpus import wordnet, WordNetCorpusReader
 
 import tensorflow as tf
@@ -44,10 +44,38 @@ def intersection_all(sets: Iterable[Set]):
     return reduce(lambda existing, new_item: existing.intersection(new_item), iterator, first_set)
 
 
+def doc_contains_keywords(tokens: List[str], keywords: List[str], allowed_gap: int) -> bool:
+    lower_keywords = [this_word.lower() for this_word in keywords]
+    lower_tokens = [this_token.lower() for this_token in tokens]
+
+    current_result_candidates = [i for i in range(len(lower_tokens)) if lower_tokens[i] == lower_keywords[0]]
+
+    for current_keyword_index in range(1, len(lower_keywords)):
+        new_candidates = []
+        for this_candidate in current_result_candidates:
+            next_keyword_index = next(
+                (i for i in range(this_candidate + 1, min(this_candidate + allowed_gap + 2, len(lower_tokens)))
+                 if lower_tokens[i] == lower_keywords[current_keyword_index]), None
+            )
+
+            if not(next_keyword_index is None):
+                new_candidates.append(next_keyword_index)
+
+        current_result_candidates = new_candidates
+
+        if len(current_result_candidates) == 0:
+            return False
+
+    return len(current_result_candidates) > 0
+
+
 def search_docs(keywords: List[str]):
     lower_keywords = (this_keyword.lower() for this_keyword in keywords)
+    initial_results = intersection_all(words_to_docs[this_keyword] for this_keyword in lower_keywords
+                                       if (this_keyword in words_to_docs))
 
-    return intersection_all(words_to_docs[this_keyword] for this_keyword in lower_keywords if (this_keyword in words_to_docs))
+    return set(doc for doc in initial_results if
+               doc_contains_keywords(corpus.processed_docs[doc], keywords, allowed_gap=2))
 
 
 wordnet.ensure_loaded()

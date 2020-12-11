@@ -77,4 +77,4 @@ class TwitterCorpus(object):
 
         y_values = [(0, 1) for _ in range(len(self.negative_tweets))] + [(1, 0) for _ in range(len(self.positive_tweets))]
         y_values = np.array(y_values)
-        return train_test_split(x_values, y_values, shuffle=True, test_size=0.97, random_state=1)
+        return train_test_split(x_values, y_values, shuffle=True, test_size=0.80, random_state=1)

@@ -1,0 +1,14 @@
+car
+boat
+mountain lion
+cat
+dog
+horse
+guns
+politics
+government
+mafia
+weapons
+vaccines
+doctor
+health
